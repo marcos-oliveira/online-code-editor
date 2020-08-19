@@ -2,8 +2,6 @@ import React from 'react';
 import TreeItem from '@material-ui/lab/TreeItem';
 
 const Tree = props => {
-
-    console.log(props);
     const clickHandler = (event, id) => {
         event.preventDefault();
         props.onLoadFile(id);

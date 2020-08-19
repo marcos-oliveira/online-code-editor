@@ -7,70 +7,113 @@ import { CircularProgress, Grid, Box } from '@material-ui/core';
 
 const OnlineEditor = props => {
 
-  const [ content, setContent ] = useState("");
   const [ edited, setEdited ] = useState(false);
-  const [ fileName, setFileName ] = useState("");
+  const [ file, setFile ] = useState();
   const [ error, setError ] = useState("");
   const [ running, setRunning ] = useState(false);
   const [ filetree, setFiletree ] = useState();
 
-  useEffect(() => {
-    console.log('useeffect');
-    fetchTree();
-  }, []);
-
   const fetchTree = useCallback(() => {
     setRunning(true);
     fetch('https://my-json-server.typicode.com/open-veezoo/editor/filetree')
-      .then( response => response.json())
+      .then( response => {
+        if (!response.ok) { throw response };
+        return response.json();
+      })
       .then( dados => {
         setRunning(false);
         setFiletree(dados);
       } )
       .catch( error => {
         setRunning(false);
-        console.log(error);
-        setError(error);
+        setError('An error ocurred');
       } );
   }, [setRunning, setFiletree, setError]);
 
+  useEffect(() => {
+    fetchTree();
+  }, [fetchTree]);
+
   const onSetContent = useCallback((content) => {
-    setContent(content);
     setEdited(true);
-  }, [setContent, setEdited]);
+    setFile(oldFile => {return {...oldFile, content: content}});
+  }, [setFile, setEdited]);
 
   const loadFile = useCallback(fileId => {
-    console.log('loadfile');
-    setRunning(true);
     fetch('https://my-json-server.typicode.com/open-veezoo/editor/files/'+fileId)
-      .then( response => response.json())
+      .then( response => {
+        if (!response.ok) { throw response };
+        return response.json();
+      })
       .then( dados => {
-        setRunning(false);
         setEdited(false);
-        setFileName(dados.name)
-        setContent(dados.content);
+        setFile({id: dados.id, name: dados.name, content: dados.content});
       } )
       .catch( error => {
-        setRunning(false);
-        console.log(error);
         setError(error);
       } );
-  }, [setRunning, setEdited, setContent, setFileName, setError]);
+  }, [setEdited, setFile, setError]);
+
+  const deleteFile = useCallback(fileId => {
+    fetch('https://my-json-server.typicode.com/open-veezoo/editor/files/'+fileId, {
+      method: 'DELETE'
+    })
+      .then( response => {
+        if (!response.ok) { throw response };
+        return response.json();
+      })
+      .then( dados => {
+        setEdited(false);
+        setFile(null)
+        alert('success');
+      } )
+      .catch( error => {
+        setError(error);
+      } );
+  }, [setEdited, setFile, setError]);
+
+  const saveFile = useCallback(fileId => {
+    const formData = new FormData();
+    formData.append('id', fileId);
+    formData.append('name', file.name);
+    formData.append('content', file.content);
+    fetch('https://my-json-server.typicode.com/open-veezoo/editor/files/'+fileId, {
+      method: 'PUT',
+      body: formData
+    })
+      .then( response => {
+        if (!response.ok) { throw response };
+        return response.json();
+      })
+      .then( dados => {
+        setEdited(false);
+        setFile(null)
+        alert('Success');
+      } )
+      .catch( error => {
+        setError(error);
+      } );
+  }, [file, setEdited, setFile, setError]);
 
   if(running){
     return <Box height="100%" display="flex" width="100%" bgcolor="grey.100"><Box m="auto"><CircularProgress/></Box></Box>;
   }
+  let msg = null;
+  if(error){
+    alert(error);
+  }
 
   return <Grid container height="100%" spacing={10}>
+  {msg}
     <Grid height="100%" item xs={3}>
       <FileTree filetree={filetree} onLoadFile={loadFile}></FileTree>
     </Grid>
     <Grid height="100%" item xs={9}>
       <Grid item xs={12}>
-        <ActionsBar edited={edited} fileName={fileName} />
+        <ActionsBar edited={edited} file={file} onDelete={deleteFile} onSave={saveFile} />
       </Grid>
-      <Box bgcolor="text.primary" height="100%">
-        <Editor content={content} onSetContent={onSetContent} />
+      <Box m={3} height="100%">
+        <Editor file={file} onSetContent={onSetContent} />
       </Box>
     </Grid>
   </Grid>;

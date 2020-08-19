@@ -8,7 +8,6 @@ import Tree from './Tree';
 
 const FileTree = props => {
     if(props.filetree){
-        console.log('thefiletree', props.filetree);
         return <Box p={2} m={1} overflow="auto" bgcolor="background.paper">
                   <TreeView 
                   defaultCollapseIcon={<ExpandMoreIcon />}

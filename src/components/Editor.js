@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { withStyles } from "@material-ui/core/styles";
 import TextField from '@material-ui/core/TextField';
 import PropTypes from "prop-types";
@@ -21,7 +21,7 @@ const styles = {
 
 const Editor = props =>  {
 
-    const { classes, content } = props;
+    const { classes, file } = props;
     return <TextField
           multiline
           className={classes.root}
@@ -32,7 +32,7 @@ const Editor = props =>  {
             props.onSetContent(e.target.value)
           }}
           variant="outlined"
-          value={content} />;
+          value={file?file.content:''} />;
 }
 
 Editor.propTypes = {
