@@ -2,19 +2,24 @@ import React from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 
-const ActionBar = props => 
-<Box display="flex" flexDirection="row-reverse" p={1} m={1}>
+const ActionBar = props => {
+    console.log(props);
+return <Box display="flex" flexDirection="row-reverse" p={1} m={1}>
     <Box p={1}>
-        <Button variant="outlined" color="secondary">
+        <Button variant="outlined" color="secondary" disabled={!props.fileName}>
         DELETE
         </Button>
     </Box>
     <Box p={1}>
-        <Button variant="outlined" color="primary">
+        <Button variant="outlined" color="primary" disabled={!props.edited}>
             SAVE
         </Button>
     </Box>
+    <Box p={2} mr={3}>
+    {props.fileName}
+    </Box>
 </Box>
+}
 
 
 export default ActionBar;

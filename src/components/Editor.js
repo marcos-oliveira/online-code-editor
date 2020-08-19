@@ -7,7 +7,10 @@ const styles = {
     root: {
       background: "black",
       width: "100%",
-      height: "100%"
+      height: "100%",
+      "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "black"
+      }
     },
     input: {
       color: "white"
@@ -18,15 +21,18 @@ const styles = {
 
 const Editor = props =>  {
 
-    const { classes, fileName } = props;
+    const { classes, content } = props;
     return <TextField
-          label={fileName}
           multiline
           className={classes.root}
           InputProps={{
             className: classes.input
           }}
-          rows="50" />;
+          onChange={e => {
+            props.onSetContent(e.target.value)
+          }}
+          variant="outlined"
+          value={content} />;
 }
 
 Editor.propTypes = {
